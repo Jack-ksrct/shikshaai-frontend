@@ -71,7 +71,9 @@ async function handleResponse<T>(res: Response): Promise<T> {
 }
 
 export async function healthCheck(): Promise<HealthResponse> {
-  const res = await fetch(`${BASE}/api/health`);
+  const res = await fetch(`${BASE}/api/health`, {
+    headers: { "ngrok-skip-browser-warning": "true" }
+  });
   return handleResponse<HealthResponse>(res);
 }
 
@@ -82,7 +84,11 @@ export async function transcribeAudio(
   const form = new FormData();
   form.append("file", audioBlob, "recording.webm");
   form.append("grade_level", gradeLevel);
-  const res = await fetch(`${BASE}/api/transcribe`, { method: "POST", body: form });
+  const res = await fetch(`${BASE}/api/transcribe`, { 
+    method: "POST", 
+    headers: { "ngrok-skip-browser-warning": "true" },
+    body: form 
+  });
   return handleResponse<TranscribeResponse>(res);
 }
 
@@ -92,7 +98,10 @@ export async function detectLanguage(
 ): Promise<LanguageInfo> {
   const res = await fetch(`${BASE}/api/detect-language`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({ text, whisper_lang: whisperLang ?? null }),
   });
   return handleResponse<LanguageInfo>(res);
@@ -105,7 +114,10 @@ export async function explainConcept(
 ): Promise<ExplainResponse> {
   const res = await fetch(`${BASE}/api/explain`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({ text, language_info: languageInfo, grade_level: gradeLevel }),
   });
   return handleResponse<ExplainResponse>(res);
@@ -118,7 +130,10 @@ export async function generateQuiz(
 ): Promise<QuizResponse> {
   const res = await fetch(`${BASE}/api/quiz`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({ concept_text: conceptText, explanation, language_info: languageInfo }),
   });
   return handleResponse<QuizResponse>(res);
@@ -130,7 +145,10 @@ export async function generateVisual(
 ): Promise<VisualResponse> {
   const res = await fetch(`${BASE}/api/visual`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({ concept_text: conceptText, explanation }),
   });
   return handleResponse<VisualResponse>(res);
@@ -143,7 +161,10 @@ export async function synthesizeSpeech(
 ): Promise<TTSResponse> {
   const res = await fetch(`${BASE}/api/tts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json",
+      "ngrok-skip-browser-warning": "true"
+    },
     body: JSON.stringify({
       text,
       primary_language: primaryLanguage,

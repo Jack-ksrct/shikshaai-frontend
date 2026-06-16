@@ -94,9 +94,10 @@ export default function Home() {
 
   // ── Health check on mount ──────────────────────────────────────────────────
   useEffect(() => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     healthCheck()
       .then((h) => setConfigErrors(h.config_errors ?? []))
-      .catch(() => setBackendError("Cannot connect to ShikshaAI backend at http://localhost:8000. Is it running?"));
+      .catch(() => setBackendError(`Cannot connect to ShikshaAI backend at ${apiUrl}. Is it running?`));
   }, []);
 
   // ── Detect language while typing (debounced 800ms) ─────────────────────────

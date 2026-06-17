@@ -70,9 +70,9 @@ export default function HistorySidebar({ isOpen, onClose, history, onSelect, onC
                 </p>
 
                 <div className="flex items-center gap-2 mt-2 pt-2 border-t border-slate-100">
-                  {entry.explanation && <BookOpen size={12} className="text-indigo-400" title="Explanation" />}
-                  {entry.visual && <ImageIcon size={12} className="text-teal-400" title="Visual Generated" />}
-                  {entry.quiz && <PenLine size={12} className="text-violet-400" title="Quiz Generated" />}
+                  {entry.explanation && <span title="Explanation"><BookOpen size={12} className="text-indigo-400" /></span>}
+                  {entry.visual && <span title="Visual Generated"><ImageIcon size={12} className="text-teal-400" /></span>}
+                  {entry.quiz && <span title="Quiz Generated"><PenLine size={12} className="text-violet-400" /></span>}
                 </div>
               </button>
             ))

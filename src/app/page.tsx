@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Mic, Sparkles, ImageIcon, BookOpen, PenLine, Globe,
-  RefreshCw, GraduationCap, ChevronDown, Volume2, Loader2
+  RefreshCw, GraduationCap, ChevronDown, Volume2, Loader2, Clock
 } from "lucide-react";
 import {
   healthCheck, transcribeAudio, detectLanguage, explainConcept,

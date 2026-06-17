@@ -180,3 +180,14 @@ export function playAudioBase64(base64: string): HTMLAudioElement {
   audio.play().catch((e) => console.warn("Audio play error:", e));
   return audio;
 }
+
+export interface HistoryEntry {
+  id: string;
+  timestamp: number;
+  conceptText: string;
+  gradeLevel: string;
+  langInfo: LanguageInfo | null;
+  explanation: ExplainResponse | null;
+  quiz: QuizResponse | null;
+  visual: VisualResponse | null;
+}

@@ -9,6 +9,7 @@ import {
   healthCheck, transcribeAudio, detectLanguage, explainConcept,
   generateQuiz, generateVisual,
   type LanguageInfo, type ExplainResponse, type QuizResponse, type VisualResponse,
+  type HistoryEntry,
 } from "@/lib/api";
 import { VoiceRecorder } from "@/lib/recorder";
 import VoiceButton from "@/components/VoiceButton";
@@ -17,6 +18,9 @@ import ExplanationPanel from "@/components/ExplanationPanel";
 import QuizPanel from "@/components/QuizPanel";
 import VisualPanel from "@/components/VisualPanel";
 import AlertBanner from "@/components/AlertBanner";
+import HistorySidebar from "@/components/HistorySidebar";
+
+const STORAGE_KEY = "shikshaai_history_v1";
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -91,11 +95,28 @@ export default function Home() {
   const [quizError, setQuizError] = useState<string | null>(null);
   const [visualError, setVisualError] = useState<string | null>(null);
 
-  // ── Health check on mount ──────────────────────────────────────────────────
+  // History
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+  const [historyOpen, setHistoryOpen] = useState(false);
+
+  const saveHistory = (newHistory: HistoryEntry[]) => {
+    setHistory(newHistory);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(newHistory));
+  };
+
+  // ── Health check & load history on mount ──────────────────────────────────
   useEffect(() => {
     healthCheck()
       .then((h) => setConfigErrors(h.config_errors ?? []))
       .catch(() => { /* silent */ });
+
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) setHistory(JSON.parse(stored));
+    } catch {
+      // ignore parse errors
+    }
   }, []);
 
   // ── Detect language while typing (debounced 800ms) ─────────────────────────
@@ -175,6 +196,20 @@ export default function Home() {
       setVisual(null);
       setQuizError(null);
       setVisualError(null);
+
+      // Create new history entry
+      const newEntry: HistoryEntry = {
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        conceptText,
+        gradeLevel,
+        langInfo: lang,
+        explanation: result,
+        quiz: null,
+        visual: null,
+      };
+      saveHistory([newEntry, ...history]);
+      setActiveHistoryId(newEntry.id);
     } catch (e: any) {
       setExplainError(e.message ?? "Failed to generate explanation");
     } finally {
@@ -192,6 +227,14 @@ export default function Home() {
     try {
       const result = await generateQuiz(conceptText, explanation.explanation, langInfo!);
       setQuiz(result);
+
+      // Update active history entry
+      if (activeHistoryId) {
+        const updated = history.map((h) =>
+          h.id === activeHistoryId ? { ...h, quiz: result } : h
+        );
+        saveHistory(updated);
+      }
     } catch (e: any) {
       setQuizError(e.message ?? "Quiz generation failed");
     } finally {
@@ -209,6 +252,14 @@ export default function Home() {
     try {
       const result = await generateVisual(conceptText, explanation.explanation);
       setVisual(result);
+
+      // Update active history entry
+      if (activeHistoryId) {
+        const updated = history.map((h) =>
+          h.id === activeHistoryId ? { ...h, visual: result } : h
+        );
+        saveHistory(updated);
+      }
     } catch (e: any) {
       setVisualError(e.message ?? "Visual generation failed");
     } finally {
@@ -227,11 +278,35 @@ export default function Home() {
     setQuizError(null);
     setVisualError(null);
     setActiveTab("explanation");
+    setActiveHistoryId(null);
+  };
+
+  const handleSelectHistory = (entry: HistoryEntry) => {
+    setConceptText(entry.conceptText);
+    setGradeLevel(entry.gradeLevel);
+    setLangInfo(entry.langInfo);
+    setExplanation(entry.explanation);
+    setQuiz(entry.quiz);
+    setVisual(entry.visual);
+    setActiveHistoryId(entry.id);
+    setActiveTab("explanation");
   };
 
   // ─── Render ───────────────────────────────────────────────────────────────
   return (
     <div className="min-h-screen bg-slate-50">
+      <HistorySidebar
+        isOpen={historyOpen}
+        onClose={() => setHistoryOpen(false)}
+        history={history}
+        onSelect={handleSelectHistory}
+        onClear={() => {
+          saveHistory([]);
+          handleReset();
+        }}
+        activeId={activeHistoryId}
+      />
+
       {/* ── Top Nav ── */}
       <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
@@ -268,6 +343,14 @@ export default function Home() {
                 </div>
               )}
             </div>
+
+            <button
+              onClick={() => setHistoryOpen(true)}
+              title="View History"
+              className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition px-3 py-1.5 rounded-lg border border-transparent hover:border-indigo-100"
+            >
+              <Clock size={14} /> History
+            </button>
 
             <button
               onClick={handleReset}

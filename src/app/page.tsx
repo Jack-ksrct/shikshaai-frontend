@@ -552,7 +552,10 @@ export default function Home() {
 
         {/* ── Footer ── */}
         <p className="text-center text-xs text-slate-400 pb-4">
-          ShikshaAI Bharat 2.0 · Built for India's 250M school students · शिक्षा सबके लिए
+          ShikshaAI Bharat 2.0 · Built for India's 250M school students · शिक्षा सबके लिए <br className="mt-2" />
+          <a href="https://github.com/Jack-ksrct/shikshaai-frontend" target="_blank" rel="noopener noreferrer" className="hover:text-slate-600 transition underline mt-1 inline-block">
+            View Source on GitHub
+          </a>
         </p>
       </div>
     </div>

@@ -62,7 +62,6 @@ const FEATURES = [
 export default function Home() {
   // Health / config
   const [configErrors, setConfigErrors] = useState<string[]>([]);
-  const [backendError, setBackendError] = useState<string | null>(null);
 
   // Input
   const [conceptText, setConceptText] = useState("");
@@ -94,10 +93,9 @@ export default function Home() {
 
   // ── Health check on mount ──────────────────────────────────────────────────
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
     healthCheck()
       .then((h) => setConfigErrors(h.config_errors ?? []))
-      .catch(() => setBackendError(`Cannot connect to ShikshaAI backend at ${apiUrl}. Is it running?`));
+      .catch(() => { /* silent */ });
   }, []);
 
   // ── Detect language while typing (debounced 800ms) ─────────────────────────
@@ -285,7 +283,6 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 py-6 space-y-5">
 
         {/* ── Errors & warnings ── */}
-        {backendError && <AlertBanner errors={[backendError]} type="error" />}
         {configErrors.length > 0 && <AlertBanner errors={configErrors} type="warning" />}
 
         {/* ── Feature cards ── */}
